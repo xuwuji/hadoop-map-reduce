@@ -57,12 +57,13 @@ public class WordCount {
 				sum += val.get();
 			}
 			result.set(sum);
+			System.out.println(key + " " + result);
 			context.write(key, result);
 		}
 	}
 
 	public static void main(String[] args) throws Exception {
-		String inputPath = WordCount.class.getResource("/input").getFile().toString();
+		String inputPath = WordCount.class.getResource("/input/json/sample.txt").getFile().toString();
 
 		String outputPath = "/Users/wuxu/Project/git/hadoop-map-reduce/hadoop-mapreduce/output/"
 				+ TimeUtil.currentTimewithMinutes();
