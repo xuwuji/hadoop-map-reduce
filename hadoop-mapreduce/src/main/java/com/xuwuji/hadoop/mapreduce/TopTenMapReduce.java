@@ -30,9 +30,6 @@ public class TopTenMapReduce {
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			String[] words = value.toString().split("	");
-			for (String s : words) {
-				// System.out.println(s);
-			}
 
 			String word = words[0];
 			int count = Integer.parseInt(words[1]);
@@ -55,19 +52,33 @@ public class TopTenMapReduce {
 	public static class TopTenReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 
 		// Tree map keeps records sorted by key
-		private TreeMap<IntWritable, Text> countWordMap = new TreeMap<IntWritable, Text>();
+		private TreeMap<Integer, String> countWordMap = new TreeMap<Integer, String>();
 
 		public void reduce(Text key, Iterable<IntWritable> values,
 				Reducer<Text, IntWritable, Text, IntWritable>.Context context)
 				throws IOException, InterruptedException {
+			System.out.println("[" + Thread.currentThread().getName() + "]  --- " + countWordMap.size());
+			System.out.println("[" + Thread.currentThread().getName() + "]  --- " + key);
 			for (IntWritable value : values) {
-				countWordMap.put(value, key);
+				System.out.println("[" + Thread.currentThread().getName() + "]  --- " + value);
+				countWordMap.put(value.get(), key.toString());
+				System.out.println("[" + Thread.currentThread().getName() + "]  --- put " + value + key);
 			}
-			if (countWordMap.size() > 5) {
+			if (countWordMap.size() > 2) {
+				System.out
+						.println("[" + Thread.currentThread().getName() + "]  --- removing " + countWordMap.firstKey());
 				countWordMap.remove(countWordMap.firstKey());
 			}
-			for (Entry<IntWritable, Text> entry : countWordMap.descendingMap().entrySet()) {
-				context.write(entry.getValue(), entry.getKey());
+			System.out.println("[" + Thread.currentThread().getName() + "]  --- " + countWordMap.size());
+		}
+
+		/**
+		 * 在最后才调用，由于只有一个reducer，所以所有的data都会经过这个reducer，而map中只保存两个data，
+		 * 所以最后输出的是最大的两个data
+		 */
+		protected void cleanup(Context context) throws IOException, InterruptedException {
+			for (Entry<Integer, String> entry : countWordMap.descendingMap().entrySet()) {
+				context.write(new Text(entry.getValue()), new IntWritable(entry.getKey()));
 			}
 		}
 	}
