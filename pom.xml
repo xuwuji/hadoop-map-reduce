@@ -66,5 +66,6 @@
 		<module>hadoop-mapreduce</module>
 		<module>hadoop-common</module>
 		<module>hadoop-pig</module>
+		<module>hadoop-hbase</module>
 	</modules>
 </project>
